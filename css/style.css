@@ -1,0 +1,18 @@
+body {
+  background-color: #f8f9fa;
+}
+
+#logo {
+  vertical-align: middle;
+}
+
+table {
+  margin-top: 20px;
+}
+
+.arrow {
+  width: 16px;
+  height: 16px;
+  transform-origin: 50% 50%;
+}
+
