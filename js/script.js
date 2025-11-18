@@ -12,7 +12,7 @@ var WIND_GUST_KEY = "wind_gusts_10m";
 
 
 var MODELS = [
-  new ModelData("Automatic", "best_match"),
+  new ModelData("Automatique", "best_match"),
   new ModelData("ICON (Seamless)", "icon_seamless"),
   new ModelData("ICON (Global)", "icon_global"),
   new ModelData("Meteo France", "meteofrance_seamless"),
@@ -46,36 +46,28 @@ var HOURS = [
   "11:00 PM"
 ]
 
-const altitudeMap = {
-  "10m": 10,
-  "80m": 80,
-  "120m": 120,
-  "180m": 180,
-  "1000hPa": 110,
-  "975hPa": 320,    
-  "950hPa": 500,    
-  "925hPa": 800,    
-  "900hPa": 1000,   
-  "850hPa": 1500,   
-  "800hPa": 1900,   
-  "700hPa": 3000,   
-  "600hPa": 4200
-}
+const altitudeMap = new Map([
+  ["10m", 10],
+  ["80m", 80],
+  ["120m", 120],
+  ["180m", 180],
+  ["1000hPa", 110],
+  ["975hPa", 320],
+  ["950hPa", 500],
+  ["925hPa", 750],
+  ["900hPa", 1000],
+  ["850hPa", 1500],
+  ["800hPa", 2000],
+  ["750hPa", 2500],
+  ["700hPa", 3000],
+  ["650hPa", 3500],
+  ["600hPa", 4200]
+]);
 
 var windParameters = [];
-windParameters.push(new WindParams(10, UNIT_METERS));
-windParameters.push(new WindParams(80, UNIT_METERS));
-windParameters.push(new WindParams(120, UNIT_METERS));
-windParameters.push(new WindParams(180, UNIT_METERS));
-windParameters.push(new WindParams(1000, UNIT_PRESSION));
-windParameters.push(new WindParams(975, UNIT_PRESSION));
-windParameters.push(new WindParams(950, UNIT_PRESSION));
-windParameters.push(new WindParams(925, UNIT_PRESSION));
-windParameters.push(new WindParams(900, UNIT_PRESSION));
-windParameters.push(new WindParams(850, UNIT_PRESSION));
-windParameters.push(new WindParams(800, UNIT_PRESSION));
-windParameters.push(new WindParams(700, UNIT_PRESSION));
-windParameters.push(new WindParams(600, UNIT_PRESSION));
+altitudeMap.forEach((value, key) => {
+  windParameters.push(new WindParams(key, value));  
+});
 
 function ModelData(name, value) {
   this.name = name;
@@ -87,13 +79,11 @@ function HourData(name, value) {
   this.value = value;
 }
 
-function WindParams(value, unit) {
-  this.value = value;
-  this.unit = unit;
-  this.key = value + unit; 
+function WindParams(key, altitude) {
+  this.key = key; 
   this.speed = WIND_SPEED_PREFIX + this.key;
   this.direction = WIND_DIRECTION_PREFIX + this.key;
-  this.altitude = altitudeMap[this.key];
+  this.altitude = altitude;
 }
 
 function WindData(direction, speed, altitude) {
@@ -152,14 +142,16 @@ function refresh() {
     return response.json();
   })
   .then(data => {
-    // Hide spinner and show table
+    // Hide spinner
     loading.classList.add('d-none');
-    table.classList.remove('d-none');
     setLastFetchedData(data);
 
     var hour = new Date().getHours();
     setSelectedHour(hour);
-    displayTable(fetchedData, hour);
+    
+    var windData = parse(data, hour);
+    var gustData = data.hourly[WIND_GUST_KEY][hour];
+    displayTable(windData, gustData);
   })
   .catch(error => {
     console.error('Error fetching data:', error);
@@ -190,19 +182,18 @@ function getCoords() {
 function getWindDataForHour(data, hour, param) {;
   var direction = data.hourly[param.direction][hour];
   var speed = data.hourly[param.speed][hour];
-  var altitude = altitudeMap[param.key];
+  var altitude = altitudeMap.get(param.key);
   return new WindData(direction, speed, altitude);
 }
 
-function displayTable(data, hour) {
+function displayTable(windData, gustData) {
   tbody.replaceChildren();
-  var windData = parse(data, hour);
   windData.forEach(wind => {
     const row = createRow(wind);
     tbody.appendChild(row);
   });
 
-  gust.innerHTML = data.hourly[WIND_GUST_KEY][hour] + " " + UNIT_KNOTS;
+  gust.innerHTML = (gustData == null ? "--" : gustData) + " " + UNIT_KNOTS;
 }
 
 function createRow(windData) {
@@ -247,7 +238,9 @@ function displayHours() {
   });
 
   hoursChoice.addEventListener('change', () => {
-    displayTable(fetchedData, hoursChoice.value);
+    var windData = parse(fetchedData, hoursChoice.value);
+    var gustData = fetchedData.hourly[WIND_GUST_KEY][hoursChoice.value];
+    displayTable(windData, gustData);
   });
 }
 
@@ -263,6 +256,18 @@ function parse(data, hour) {
   return result;
 }
 
+function displayDummyData() {
+  var dummyData = [];
+  altitudeMap.forEach((value, key) => {
+    dummyData.push(new WindData(null, null, value));  
+  });
+
+  dummyData.sort((a, b) => b.altitude - a.altitude);
+  displayTable(dummyData, null);
+}
+
 displayHours();
 displayModels();
+displayDummyData();
+
 refresh();
