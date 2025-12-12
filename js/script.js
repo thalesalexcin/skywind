@@ -4,9 +4,13 @@ const longitude = -0.056;
 
 var UNIT_METERS = "m";
 var UNIT_KNOTS = "kt";
+var UNIT_TEMPERATURE = "°";
+var UNIT_CLOUD_COVER = "%";
 var UNIT_PRESSION = "hPa";
 var WIND_SPEED_PREFIX = "wind_speed_";
-var WIND_DIRECTION_PREFIX = "wind_direction_";
+var WIND_DIRECTION_PREFIX = "wind_direction_"
+var TEMPERATURE_PREFIX = "temperature_";
+var CLOUD_COVER_PREFIX = "cloud_cover_";
 var WIND_GUST_KEY = "wind_gusts_10m";
 
 
@@ -83,12 +87,16 @@ function WindParams(key, altitude) {
   this.key = key; 
   this.speed = WIND_SPEED_PREFIX + this.key;
   this.direction = WIND_DIRECTION_PREFIX + this.key;
+  this.temperature = TEMPERATURE_PREFIX + this.key;
+  this.cloudCover = CLOUD_COVER_PREFIX + this.key;
   this.altitude = altitude;
 }
 
-function WindData(direction, speed, altitude) {
+function WindData(direction, speed, temperature, cloudCover, altitude) {
   this.direction = direction;
   this.speed = speed;
+  this.temperature = temperature;
+  this.cloudCover = cloudCover;
   this.altitude = altitude;
 }
 
@@ -149,6 +157,7 @@ function refresh() {
     var hour = new Date().getHours();
     setSelectedHour(hour);
     
+    console.log(data);
     var windData = parse(data, hour);
     var gustData = data.hourly[WIND_GUST_KEY][hour];
     displayTable(windData, gustData);
@@ -169,6 +178,8 @@ function getWindParameters() {
   windParameters.forEach(p => {
     windParamsRaw.push(p.direction);
     windParamsRaw.push(p.speed);
+    windParamsRaw.push(p.temperature);
+    windParamsRaw.push(p.cloudCover);
   });
 
   windParamsRaw.push(WIND_GUST_KEY);
@@ -182,8 +193,10 @@ function getCoords() {
 function getWindDataForHour(data, hour, param) {;
   var direction = data.hourly[param.direction][hour];
   var speed = data.hourly[param.speed][hour];
+  var temperature = data.hourly[param.temperature][hour];
+  var cloudCover = data.hourly[param.cloudCover][hour];
   var altitude = altitudeMap.get(param.key);
-  return new WindData(direction, speed, altitude);
+  return new WindData(direction, speed, temperature, cloudCover, altitude);
 }
 
 function displayTable(windData, gustData) {
@@ -202,6 +215,8 @@ function createRow(windData) {
     <td class="text-center">${windData.altitude} m</td>
     <td class="text-center">${ windData.speed == null ? "--" : windData.speed} ${UNIT_KNOTS}</td>
     <td class="text-center">${windData.direction == null ? "-- " : windData.direction} ° <img class="arrow" style="transform: rotate(${windData.direction + 180}deg);" src="images/up-arrow.png" alt="Arrow"></td>
+    <td class="text-center">${ windData.temperature == null ? "--" : windData.temperature} ${UNIT_TEMPERATURE}</td>
+    <td class="text-center">${ windData.cloudCover == null ? "--" : windData.cloudCover} ${UNIT_CLOUD_COVER}</td>
   `;
   return row;
 }
