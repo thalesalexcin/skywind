@@ -156,11 +156,7 @@ function refresh() {
 
     var hour = new Date().getHours();
     setSelectedHour(hour);
-    
-    console.log(data);
-    var windData = parse(data, hour);
-    var gustData = data.hourly[WIND_GUST_KEY][hour];
-    displayTable(windData, gustData);
+    displayForHour(hour);
   })
   .catch(error => {
     console.error('Error fetching data:', error);
@@ -216,7 +212,6 @@ function createRow(windData) {
     <td class="text-center">${ windData.speed == null ? "--" : windData.speed} ${UNIT_KNOTS}</td>
     <td class="text-center">${windData.direction == null ? "-- " : windData.direction} ° <img class="arrow" style="transform: rotate(${windData.direction + 180}deg);" src="images/up-arrow.png" alt="Arrow"></td>
     <td class="text-center">${ windData.temperature == null ? "--" : windData.temperature} ${UNIT_TEMPERATURE}</td>
-    <td class="text-center">${ windData.cloudCover == null ? "--" : windData.cloudCover} ${UNIT_CLOUD_COVER}</td>
   `;
   return row;
 }
@@ -244,6 +239,8 @@ function getModels() {
 
 function displayHours() {
   const hoursChoice = document.querySelector('#hours');
+  const prevHourButton = document.querySelector('#prevHourButton');
+  const nextHourButton = document.querySelector('#nextHourButton');
   
   HOURS.forEach((element, index) => {
     const option = document.createElement('option');
@@ -253,10 +250,24 @@ function displayHours() {
   });
 
   hoursChoice.addEventListener('change', () => {
-    var windData = parse(fetchedData, hoursChoice.value);
-    var gustData = fetchedData.hourly[WIND_GUST_KEY][hoursChoice.value];
-    displayTable(windData, gustData);
+    displayForHour(hoursChoice.value);
   });
+
+  prevHourButton.addEventListener("click", () => {
+    hoursChoice.value = Math.max(parseInt(hoursChoice.value - 1), 0);
+    displayForHour(hoursChoice.value);
+  });
+
+  nextHourButton.addEventListener("click", () => {
+    hoursChoice.value = Math.min( parseInt(hoursChoice.value) + 1, 23);
+    displayForHour(hoursChoice.value);
+  });
+}
+
+function displayForHour(hour) {
+  var windData = parse(fetchedData, hour);
+  var gustData = fetchedData.hourly[WIND_GUST_KEY][hour];
+  displayTable(windData, gustData);
 }
 
 function setSelectedHour(hour) {

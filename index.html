@@ -41,13 +41,31 @@
       <div class="container">
         <div class="row">
           <div class="col-sm-12 col-md-2 p-4">
-            <div class="mb-3">
-              <label for="models" class="form-label">Modèle</label>
-              <select id="models" class="form-select"></select>
+            <div class="col-6 col-md-12 mb-3">
+              <div class="form-floating">
+                <select id="models" class="form-select"></select>
+                <label for="models">Modèle</label>
+              </div>
             </div>
-            <div>
-              <label for="hours" class="form-label">Heure</label>
-              <select id="hours" class="form-select"></select>
+            <div
+              class="col-12 col-md-12 d-flex flex-wrap align-items-end gap-0"
+            >
+              <div class="col-6 col-lg-12 form-floating">
+                <select id="hours" class="form-select"></select>
+                <label for="hours">Heure</label>
+              </div>
+              <button
+                class="col-2 col-lg-4 mx-2 my-2 btn btn-primary h-100"
+                id="prevHourButton"
+              >
+                &lt;
+              </button>
+              <button
+                class="col-2 col-lg-4 my-2 btn btn-primary h-100"
+                id="nextHourButton"
+              >
+                &gt;
+              </button>
             </div>
             <div id="loading" class="text-center my-5">
               <div class="spinner-border text-primary" role="status">
@@ -63,9 +81,6 @@
                   <th scope="col" class="col-sm-4 text-center">Vitesse</th>
                   <th scope="col" class="col-sm-4 text-center">Provenance</th>
                   <th scope="col" class="col-sm-4 text-center">Temperature</th>
-                  <th scope="col" class="col-sm-4 text-center">
-                    Couverture Nuageuse
-                  </th>
                 </tr>
               </thead>
               <tbody></tbody>
