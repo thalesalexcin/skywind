@@ -292,6 +292,16 @@ function displayDummyData() {
   displayTable(dummyData, null);
 }
 
+let lastTouchEnd = 0;
+
+document.addEventListener('touchend', function (event) {
+  const now = (new Date()).getTime();
+  if (now - lastTouchEnd <= 300) { // double-tap threshold (300ms)
+    event.preventDefault();        // prevent double-tap zoom
+  }
+  lastTouchEnd = now;
+}, false);
+
 displayHours();
 displayModels();
 displayDummyData();
