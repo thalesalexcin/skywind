@@ -1,5 +1,12 @@
 body {
   background-color: #f8f9fa;
+  -webkit-user-select: none;
+    /* Safari/Chrome */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE/Edge */
+    user-select: none;
 }
 
 #logo {
@@ -15,4 +22,5 @@ table {
   height: 16px;
   transform-origin: 50% 50%;
 }
+
 
